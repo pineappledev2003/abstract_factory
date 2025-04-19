@@ -1,3 +1,4 @@
+import 'package:abstract_factory/controller/paypal_controller.dart';
 import 'package:abstract_factory/providers/paypal_form_provider.dart';
 import 'package:abstract_factory/ui/shared/custom_tarjeta.dart';
 import 'package:flutter/material.dart';
@@ -5,11 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:validatorless/validatorless.dart';
 
-
-
 class PayPalView extends StatefulWidget {
-
-  final String baseURL; 
+  final String baseURL;
 
   const PayPalView({super.key, required this.baseURL});
 
@@ -25,7 +23,7 @@ class _PayPalViewState extends State<PayPalView> {
       child: Builder(
         builder: (context) {
           final payPalFormProvider = Provider.of<PaypalFormProvider>(context);
-
+          final payPalController = Provider.of<PaypalController>(context, listen: false);
           return Column(
             children: [
               CustomTarjeta(
@@ -36,7 +34,6 @@ class _PayPalViewState extends State<PayPalView> {
                   MapEntry("Tarjeta:", widget.baseURL),
                   MapEntry("Email:", payPalFormProvider.email),
                   MapEntry("Limite Paypal:", payPalFormProvider.limitePayPal.toString()),
-                  
                 ],
               ),
               SizedBox(height: 20),
@@ -50,7 +47,7 @@ class _PayPalViewState extends State<PayPalView> {
               ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: 300),
                 child: Form(
-                  key:payPalFormProvider.formKey,
+                  key: payPalFormProvider.formKey,
                   autovalidateMode: AutovalidateMode.always,
                   child: Wrap(
                     runSpacing: 10,
@@ -75,7 +72,7 @@ class _PayPalViewState extends State<PayPalView> {
                           hintText: "Ej: example@example.com",
                         ),
                         onChanged: (value) {
-                         payPalFormProvider.nuevoEmail = value;
+                          payPalFormProvider.nuevoEmail = value;
                         },
                         validator: Validatorless.multiple([
                           Validatorless.required("Este campo es requerido"),
@@ -90,7 +87,7 @@ class _PayPalViewState extends State<PayPalView> {
                         ),
                         onChanged: (value) {
                           final parse = double.tryParse(value);
-                         payPalFormProvider.nuevoLimitePayPal = parse!;
+                          payPalFormProvider.nuevoLimitePayPal = parse!;
                         },
                         validator: Validatorless.multiple([
                           Validatorless.required("Este campo es requerido"),
@@ -101,7 +98,14 @@ class _PayPalViewState extends State<PayPalView> {
                           final validForm = payPalFormProvider.validateForm();
 
                           if (validForm == true) {
-                            print("OK");
+                            payPalController.registrarPayPal(
+                              widget.baseURL,
+                              payPalFormProvider.email,
+                              payPalFormProvider.limitePayPal,
+                            );
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('✅ Tarjeta registrada')));
                           } else {
                             print("NOT OOK");
                           }

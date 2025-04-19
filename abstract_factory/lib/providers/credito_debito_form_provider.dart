@@ -7,7 +7,7 @@ class CreditoDebitoFormProvider extends ChangeNotifier {
   String numeroTarjeta = "";
   String nombreTitular = "";
   String cvv = "";
-  double limiteCredito = 0.0;
+  double limite = 0.0;
 
   set setTipoTarjeta(String value) {
     tipoTarjeta = value;
@@ -30,7 +30,7 @@ class CreditoDebitoFormProvider extends ChangeNotifier {
   }
 
   set setLimiteCredito(double value) {
-    limiteCredito = value;
+    limite = value;
     notifyListeners();
   }
 

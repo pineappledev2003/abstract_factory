@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
 class DebitoController extends ChangeNotifier {
   final Map<String, Debito> _listaDebitos = {};
 
-
-  void registrarTarjeta(String tipoTarjera, String numeroTarjeta, String nombreTitular, String cvv, double limiteCredito){
+  void registrarTarjetasDebitos(String tipoTarjeta, String numeroTarjeta, String nombreTitular, String cvv, double disponible){
     if (_listaDebitos.containsKey(numeroTarjeta)) {
-      throw Exception("Esta tarjeta credito ya esta registrada");
+      throw Exception("Esta tarjeta ya esta registrada");
     }
-    Debito debito = Debito(tipoTarjeta: tipoTarjera, numeroTarjeta: numeroTarjeta, nombreTitular: nombreTitular, cvv: cvv, disponible: limiteCredito);
+
+    Debito debito = Debito(tipoTarjeta: tipoTarjeta, numeroTarjeta: numeroTarjeta, nombreTitular: nombreTitular, cvv: cvv, disponible: disponible);
 
     _listaDebitos[numeroTarjeta] = debito;
     notifyListeners();
   }
 
-  Map<String,Debito> obtenerListaCreditos(){
+  Map<String,Debito> obtenerListaDebitos(){
     return _listaDebitos;
   }
 }

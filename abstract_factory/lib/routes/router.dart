@@ -16,10 +16,11 @@ class RouterFluro {
   //? Puede ser llamado desde cualquier lugar sin crear un objeto de esta clase
   static void configureRoutes(){
 
-    router.define("/", handler: RouterHandlers.crearPagoHandler, transitionType: TransitionType.fadeIn);
+    router.define("/", handler: RouterHandlers.initialRoute, transitionType: TransitionType.fadeIn);
     router.define("/tarjeta_credito/:base", handler: RouterHandlers.crearPagoHandler, transitionType: TransitionType.fadeIn);
     router.define("/tarjeta_debito/:base", handler: RouterHandlers.debitoPagoHandler, transitionType: TransitionType.fadeIn);
     router.define("/tarjeta_paypal/:base", handler: RouterHandlers.payPalPagoHandler, transitionType: TransitionType.fadeIn);
+    router.define("/lista_tarjetas", handler: RouterHandlers.listaTarjetas, transitionType: TransitionType.fadeIn);
 
 
     //Imporatante siempre definir el notFoundHandler

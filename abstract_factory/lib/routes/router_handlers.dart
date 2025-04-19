@@ -1,10 +1,17 @@
 import 'package:abstract_factory/ui/views/credito_view.dart';
 import 'package:abstract_factory/ui/views/debito_view.dart';
+import 'package:abstract_factory/ui/views/lista_tarjeta_view.dart';
 import 'package:abstract_factory/ui/views/no_page_found_view.dart';
 import 'package:abstract_factory/ui/views/paypal_view.dart';
 import 'package:fluro/fluro.dart';
 
 class RouterHandlers {
+  static Handler initialRoute = Handler(
+    handlerFunc: (context, parameters) {
+        return CreditoView(baseURL:"CREDITO");
+    
+    },
+  );
   static Handler crearPagoHandler = Handler(
     handlerFunc: (context, parameters) {
       final tipo = parameters["base"]?.first.toUpperCase();
@@ -37,6 +44,12 @@ class RouterHandlers {
       } else {
         return NoPageFoundView();
       }
+    },
+  );
+
+   static Handler listaTarjetas = Handler(
+    handlerFunc: (context, parameters) {
+      return ListaTarjetasView();
     },
   );
 

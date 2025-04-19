@@ -1,5 +1,5 @@
+import 'package:abstract_factory/controller/credito_controller.dart';
 import 'package:abstract_factory/providers/credito_debito_form_provider.dart';
-import 'package:abstract_factory/service/pago_servicio.dart';
 import 'package:abstract_factory/ui/shared/custom_tarjeta.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -17,7 +17,6 @@ class CreditoView extends StatefulWidget {
 
 class _CreditoViewState extends State<CreditoView> {
   double monto = 0.0;
-  Future<Map<String, dynamic>>? _futurePago;
 
   /*
 ╔════════════════════════════════════════════════════════════╗
@@ -47,12 +46,12 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CreditoDebitoFormProvider(),
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => CreditoDebitoFormProvider())],
       child: Builder(
         builder: (context) {
           final creditoDebitoFormProvider = Provider.of<CreditoDebitoFormProvider>(context);
-
+          final creditoDebitoController = Provider.of<CreditoController>(context, listen: false);
           return Column(
             children: [
               CustomTarjeta(
@@ -64,7 +63,7 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
                   MapEntry("Numero Tarjeta:", creditoDebitoFormProvider.numeroTarjeta),
                   MapEntry("Nombre Titular:", creditoDebitoFormProvider.nombreTitular),
                   MapEntry("CVV:", creditoDebitoFormProvider.cvv),
-                  MapEntry("Limite Credito:", creditoDebitoFormProvider.limiteCredito.toString()),
+                  MapEntry("Limite Credito:", creditoDebitoFormProvider.limite.toString()),
                 ],
               ),
               SizedBox(height: 20),
@@ -152,19 +151,6 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          label: Text("Monto"),
-                          hintText: "Ej: 20000",
-                        ),
-                        onChanged: (value) {
-                          monto = double.parse(value);
-                        },
-                        validator: Validatorless.multiple([
-                          Validatorless.required("Este campo es requerido"),
-                        ]),
-                      ),
                       ElevatedButton(
                         onPressed: () {
                           final validForm =
@@ -173,14 +159,17 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
                                 listen: false,
                               ).validateForm();
                           if (validForm) {
-                            setState(() {
-                              _futurePago = PagoServicio.procesarPago(
-                                widget.baseURL,
-                                creditoDebitoFormProvider.numeroTarjeta,
-                                double.parse(creditoDebitoFormProvider.limiteCredito.toString()),
-                                monto,
-                              );
-                            });
+                            creditoDebitoController.registrarTarjetasCredito(
+                              widget.baseURL,
+                              creditoDebitoFormProvider.numeroTarjeta,
+                              creditoDebitoFormProvider.nombreTitular,
+                              creditoDebitoFormProvider.cvv,
+                              double.parse(creditoDebitoFormProvider.limite.toString()),
+                            );
+
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('✅ Tarjeta registrada')));
                           }
                         },
                         child: Text("GUARDAR"),
@@ -189,57 +178,6 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
                   ),
                 ),
               ),
-
-              if (_futurePago != null) ...[
-                FutureBuilder<Map<String, dynamic>>(
-                  future: _futurePago,
-                  builder: (BuildContext context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(); // Esperando el resultado
-                    } else if (snapshot.hasError) {
-                      // Usamos un post-frame callback para mostrar el SnackBar después de que el build haya terminado
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('❌ Error: ${snapshot.error}')));
-                      });
-                      return SizedBox.shrink(); // Si hay error, no mostramos nada más.
-                    } else if (snapshot.hasData) {
-                      final resp = snapshot.data!;
-
-                      if (resp["success"] == true) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('✅ Pago exitoso'),
-                                  Text('💳 Tipo Tarjeta: ${resp['tipo']}'),
-                                  Text('👤 Id: ${resp['id']}'),
-                                  Text('💵 Monto Final: ${resp['monto_final']}'),
-                                  Text('💰 Nuevo Limite: ${resp['nuevo_limite']}'),
-                                  Text('💬 Mensaje: ${resp['mensaje']}'),
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-                      } else {
-                        // Si el pago falló
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('❌ Pago fallido: ${resp['mensaje']}')),
-                          );
-                        });
-                      }
-                      return SizedBox.shrink(); // Si ya procesaste los datos, no necesitamos mostrar nada más.
-                    } else {
-                      return SizedBox.shrink(); // Si no hay datos aún, no mostramos nada.
-                    }
-                  },
-                ),
-              ],
             ],
           );
         },
@@ -247,3 +185,8 @@ En todo otro caso, `listen: false` es más seguro y eficiente.
     );
   }
 }
+
+
+/**
+ * 
+ */

@@ -1,3 +1,4 @@
+import 'package:abstract_factory/controller/debito_controller.dart';
 import 'package:abstract_factory/providers/credito_debito_form_provider.dart';
 import 'package:abstract_factory/ui/shared/custom_tarjeta.dart';
 import 'package:flutter/material.dart';
@@ -5,10 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:validatorless/validatorless.dart';
 
-
-
 class DebitoView extends StatefulWidget {
-
   final String baseURL;
 
   const DebitoView({super.key, required this.baseURL});
@@ -25,7 +23,7 @@ class _DebitoViewState extends State<DebitoView> {
       child: Builder(
         builder: (context) {
           final creditoDebitoFormProvider = Provider.of<CreditoDebitoFormProvider>(context);
-
+          final debitoController = Provider.of<DebitoController>(context, listen: false);
           return Column(
             children: [
               CustomTarjeta(
@@ -37,7 +35,7 @@ class _DebitoViewState extends State<DebitoView> {
                   MapEntry("Numero Tarjeta:", creditoDebitoFormProvider.numeroTarjeta),
                   MapEntry("Nombre Titular:", creditoDebitoFormProvider.nombreTitular),
                   MapEntry("CVV:", creditoDebitoFormProvider.cvv),
-                  MapEntry("Saldo Disponible:", creditoDebitoFormProvider.limiteCredito.toString()),
+                  MapEntry("Saldo Disponible:", creditoDebitoFormProvider.limite.toString()),
                 ],
               ),
               SizedBox(height: 20),
@@ -68,7 +66,7 @@ class _DebitoViewState extends State<DebitoView> {
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                  
+
                       TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
@@ -82,7 +80,7 @@ class _DebitoViewState extends State<DebitoView> {
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                  
+
                       TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
@@ -96,7 +94,7 @@ class _DebitoViewState extends State<DebitoView> {
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                  
+
                       TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
@@ -110,7 +108,7 @@ class _DebitoViewState extends State<DebitoView> {
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                  
+
                       TextFormField(
                         decoration: InputDecoration(
                           border: OutlineInputBorder(),
@@ -125,15 +123,25 @@ class _DebitoViewState extends State<DebitoView> {
                           Validatorless.required("Este campo es requerido"),
                         ]),
                       ),
-                      ElevatedButton(onPressed: () {
-                        final validForm = creditoDebitoFormProvider.validateForm();
+                      ElevatedButton(
+                        onPressed: () {
+                          final validForm = creditoDebitoFormProvider.validateForm();
 
-                        if (validForm == true) {
-                          print("OK");
-                        }else{
-                          print("NOT OOK");
-                        }
-                      }, child: Text("GUARDAR"))
+                          if (validForm == true) {
+                            debitoController.registrarTarjetasDebitos(
+                              widget.baseURL,
+                              creditoDebitoFormProvider.numeroTarjeta,
+                              creditoDebitoFormProvider.nombreTitular,
+                              creditoDebitoFormProvider.cvv,
+                              creditoDebitoFormProvider.limite,
+                            );
+                            ScaffoldMessenger.of(
+                              context,
+                            ).showSnackBar(SnackBar(content: Text('✅ Tarjeta registrada')));
+                          } else {}
+                        },
+                        child: Text("GUARDAR"),
+                      ),
                     ],
                   ),
                 ),

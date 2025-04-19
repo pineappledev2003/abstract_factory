@@ -11,34 +11,33 @@ class PagoServicio {
   ) async {
     final data = {"tipo": tipo, "id": id, "limite": limite, "monto": monto};
 
-    try {
-      final respuesta = await BackendFrog.post("/procesar_pago", data);
-      final respuestaBackend = RespuestaBackend.fromJson(respuesta);
+    final respuesta = await BackendFrog.post("/procesar_pago", data);
+    final respuestaBackend = RespuestaBackend.fromJson(respuesta);
 
-      if (respuestaBackend.success) {
+    if (respuestaBackend.success) {
+      final success = respuestaBackend.success;
+      final tipo = respuestaBackend.tipo;
+      final id = respuestaBackend.id;
+      final montoFinal = respuestaBackend.montoFinal;
+      final nuevoLimite = respuestaBackend.nuevoLimite;
+      final mensaje = respuestaBackend.mensaje;
 
-        final success = respuestaBackend.success;
-        final tipo = respuestaBackend.tipo;
-        final id = respuestaBackend.id;
-        final montoFinal = respuestaBackend.montoFinal;
-        final nuevoLimite = respuestaBackend.nuevoLimite;
-        final mensaje = respuestaBackend.mensaje;
-
-        return {
-          "success":success,
-          "tipo":tipo,
-          "id":id,
-          "monto_final":montoFinal,
-          "nuevo_limite":nuevoLimite,
-          "mensaje":mensaje
-        };
-      } else {
-        final errorRespuesta = ErrorBackend.fromJson(respuesta);
-
-        return {'success': false, 'mensaje': errorRespuesta.mensaje};
-      }
-    } catch (e) {
-      return {"error": e};
+      return {
+        "success": success,
+        "tipo": tipo,
+        "id": id,
+        "monto_final": montoFinal,
+        "nuevo_limite": nuevoLimite,
+        "mensaje": mensaje,
+      };
+    }else{
+      final respuestaMalaBackend = ErrorBackend.fromJson(respuesta);
+      return {
+        "success":respuestaMalaBackend.success,
+        "mensaje":respuestaMalaBackend.mensaje
+      };
     }
+
+   
   }
 }

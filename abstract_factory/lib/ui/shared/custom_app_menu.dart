@@ -71,7 +71,10 @@ class _DesktopMenu extends StatelessWidget {
             ),
           ),
 
-          Positioned(left: 390, child: CustomFaltButton(text: "HACER PAGO", onPressed: () {})),
+          Positioned(left: 390, child: CustomFaltButton(text: "LISTA TARJETAS", onPressed: () {
+             NavigationServices.navigateTo("/lista_tarjetas");
+          })),
+          
 
           Positioned(
             right: 0,
